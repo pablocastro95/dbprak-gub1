@@ -15,7 +15,7 @@ public class Gruppenuebung1_Gruppe1 {
 		
 		
 		if(repo != null) {
-			try(Reader in = new BufferedReader(new FileReader(new File("src/main/resources/data.csv")));) {
+			try(Reader in = new BufferedReader(new FileReader(new File("src/main/resources/out.csv")));) {
 				repo.importData(in);
 				
 			} catch (IOException | SQLException e) {

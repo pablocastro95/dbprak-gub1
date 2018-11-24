@@ -1,15 +1,13 @@
 package gruppe1.gruppenuebung1;
 
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 import org.postgresql.copy.CopyManager;
 import org.postgresql.core.BaseConnection;
@@ -45,13 +43,14 @@ public class EmbeddingRepository {
 			stmt.close();
 			serverCon.close();
 			
-			serverCon =  DriverManager.getConnection(url + "nlp/", user, password);
+			serverCon =  DriverManager.getConnection(url + "nlp", user, password);
 			stmt = serverCon.createStatement();
-			String createTable = "CREATE TABLE EMBEDDINGS (WORD int not NULL, ";
+			String createTable = "CREATE TABLE EMBEDDINGS (WORD VARCHAR not NULL, ";
 			for(int i = 1; i <301; i++) {
-				createTable.concat(" DIM" + i + " double,");
+				createTable = createTable.concat(" DIM" + i + " double precision,");
 			}
-			createTable.concat(" PRIMARY KEY (WORD)); ");
+			createTable = createTable.concat(" LENGTH double precision, ");
+			createTable = createTable.concat(" PRIMARY KEY (WORD)); ");
 			stmt.executeUpdate(createTable);
 			stmt.close();
 			repo = new EmbeddingRepository(serverCon);
@@ -66,17 +65,10 @@ public class EmbeddingRepository {
 				}
 				
 			}
+			e.printStackTrace();
 		}
 		return repo;
 	}
-	
-	public boolean connect(String user, String password) {
-		boolean success = true;
-		
-		return success;	
-	}
-	
-	
 	
 	public void importData(Reader in) throws SQLException{
 		String tableName = "EMBEDDINGS";
@@ -84,7 +76,7 @@ public class EmbeddingRepository {
 		if(con != null) {
 			try {
 				CopyManager copyManager = new CopyManager((BaseConnection) con);
-		        copyManager.copyIn("COPY " + tableName + " FROM STDIN CSV HEADER DELIMITER ','", in);
+		        copyManager.copyIn("COPY " + tableName + " FROM STDIN CSV HEADER DELIMITER ';'", in);
 			} catch(SQLException e) {
 				e.printStackTrace();
 			} catch(FileNotFoundException e) {
@@ -95,10 +87,11 @@ public class EmbeddingRepository {
 		}
 	}
 	
+	public List<String> getKNearestNeighbors(int k, String word) {
+		return null;
+	}
 	
-
-	
-	
-	
-
+	public double getCosSimilarity(String w1, String w2) {
+		return 0;
+	}
 }
