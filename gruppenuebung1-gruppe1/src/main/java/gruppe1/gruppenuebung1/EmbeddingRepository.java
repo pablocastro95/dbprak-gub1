@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
@@ -85,6 +86,12 @@ public class EmbeddingRepository {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public boolean containsWord(String word) throws SQLException{
+		PreparedStatement stmt = con.prepareStatement("SELECT WORD FROM EMBEDDINGS WHERE word=?");
+		stmt.setString(1, word);
+		return stmt.executeQuery().next();
 	}
 	
 	public List<String> getKNearestNeighbors(int k, String word) {
