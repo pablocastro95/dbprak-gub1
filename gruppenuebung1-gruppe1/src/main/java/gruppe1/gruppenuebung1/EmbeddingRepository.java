@@ -94,11 +94,11 @@ public class EmbeddingRepository {
 		return stmt.executeQuery().next();
 	}
 	
-	public List<String> getKNearestNeighbors(int k, String word) {
+	public List<String> getKNearestNeighbors(int k, String word, boolean normalized) {
 		return null;
 	}
 	
-	public double getCosSimilarity(String w1, String w2) {
+	public double getCosSimilarity(String w1, String w2, boolean normalized) {
 		return 0;
 	}
 }
