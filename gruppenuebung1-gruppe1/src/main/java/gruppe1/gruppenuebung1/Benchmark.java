@@ -49,6 +49,11 @@ public abstract class Benchmark {
 		return result;
 	}
 	
-	public abstract void importData(String filePath);
+	/**
+	 * Import Data from a file
+	 * @param filePath The path of the file containing the data.
+	 * @return If the import was successful.
+	 */
+	public abstract boolean importData(String filePath);
 
 }

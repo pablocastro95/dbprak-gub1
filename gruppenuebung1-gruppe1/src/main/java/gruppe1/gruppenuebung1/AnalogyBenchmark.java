@@ -9,12 +9,13 @@ public class AnalogyBenchmark extends Benchmark {
 	}
 
 	@Override
-	public void importData(String filePath) {
+	public boolean importData(String filePath) {
+		boolean success = true;
 		// TODO Michael
 		
 		//for every line in doc
-		//	addTask(new AnalogyTask(w1, w2, w3, normalized))
-
+		//	addTask(new AnalogyTask(w1, w2, w3, normalized), 10)
+		return success;
 	}
 
 }
