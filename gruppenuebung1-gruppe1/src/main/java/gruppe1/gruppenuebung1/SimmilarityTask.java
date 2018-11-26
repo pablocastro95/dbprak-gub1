@@ -1,20 +1,21 @@
 package gruppe1.gruppenuebung1;
 
+import java.sql.SQLException;
+
 public class SimmilarityTask implements BenchmarkTask{
 	private String w1; 
 	private String w2;
-	double expectedResult;
+	private boolean normalized;
 	
-	public SimmilarityTask(String w1, String w2, double expectedResult) {
+	public SimmilarityTask(String w1, String w2, boolean normalized) {
 		this.w1 = w1;
 		this.w2 = w2;
-		this. expectedResult = expectedResult;
+		this.normalized = normalized;
 	}
 
 	@Override
-	public boolean run(EmbeddingRepository repo) {
-		double result = repo.getCosSimilarity(w1, w2, true);
-		return result == expectedResult;
+	public long run(EmbeddingRepository repo) throws SQLException {
+		return repo.getCosSimilarity(w1, w2, normalized).getRunTime();
 	}
 
 }
