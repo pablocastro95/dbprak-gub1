@@ -32,6 +32,18 @@ public class BenchmarkResult {
 		
 	}
 	
+	public long getMin() {
+		return minTime;
+	}
+	
+	public long getMax() {
+		return maxTime;
+	}
+	
+	public double getAvg() {
+		return avgTime;
+	}
+	
 	public double getVariance() {
 		double variance = 0;
 		if (countObservations != 0) {

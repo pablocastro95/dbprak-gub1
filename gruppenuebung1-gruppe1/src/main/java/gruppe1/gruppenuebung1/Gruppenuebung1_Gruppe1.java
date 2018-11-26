@@ -17,13 +17,13 @@ public class Gruppenuebung1_Gruppe1 {
 		if(repo != null) {
 			try(Reader in = new BufferedReader(new FileReader(new File("src/main/resources/out.csv")));) {
 				repo.importData(in);
-				System.out.println("the: " + repo.getVectorNorm("the"));
-				System.out.println("king: " + repo.getVectorNorm("king"));
-				System.out.println("but: " + repo.getVectorNorm("but"));
-				System.out.println("tree: " + repo.getVectorNorm("tree"));
-				System.out.println("sun - sunlight: " + repo.getCosSimilarity("sun", "sunlight", false));
-				System.out.println("club - played: " + repo.getCosSimilarity("club", "played", false));
-				
+				Benchmark bm = new SimmilarityBenchmark(false);
+				System.out.println(bm.importData("src/main/resources/MEN_dataset_natural_form_full"));
+				BenchmarkResult result= bm.run(repo);
+				System.out.println("Min: " + result.getMin());
+				System.out.println("Max: " + result.getMax());
+				System.out.println("Avg: " + result.getAvg());
+				System.out.println("Variance: " + result.getVariance());
 			} catch (IOException | SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
