@@ -16,14 +16,24 @@ public class Gruppenuebung1_Gruppe1 {
 		
 		if(repo != null) {
 			try(Reader in = new BufferedReader(new FileReader(new File("src/main/resources/out.csv")));) {
+				// Import data to local database
 				repo.importData(in);
+				
+				// Execute Similarity Benchmark (Exercise 4.1)
+				System.out.println("Executing benchmark 4.1...");								
 				Benchmark bm = new SimmilarityBenchmark(false);
-				System.out.println(bm.importData("src/main/resources/MEN_dataset_natural_form_full"));
+				System.out.println("File MEN_dataset_natural_form_full loaded with status: " + bm.importData("src/main/resources/MEN_dataset_natural_form_full"));
 				BenchmarkResult result= bm.run(repo);
-				System.out.println("Min: " + result.getMin());
-				System.out.println("Max: " + result.getMax());
-				System.out.println("Avg: " + result.getAvg());
-				System.out.println("Variance: " + result.getVariance());
+				result.printResults();
+				
+				// Execute Contains Benchmark (Exercise 4.3)
+				System.out.println("Executing benchmark 4.3...");				
+				bm = new ContainsBenchmark();
+				System.out.println("File vocabs_shuffled loaded with status: " + bm.importData("src/main/resources/vocabs_shuffled.txt"));
+				result= bm.run(repo);
+				result.printResults();				
+				
+
 			} catch (IOException | SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

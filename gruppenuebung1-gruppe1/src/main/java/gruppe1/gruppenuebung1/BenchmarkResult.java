@@ -52,7 +52,12 @@ public class BenchmarkResult {
 		return variance;
 	}
 	
-	
+	public void printResults() {
+		System.out.println("Min: " + this.getMin());
+		System.out.println("Max: " + this.getMax());
+		System.out.println("Avg: " + this.getAvg());
+		System.out.println("Variance: " + this.getVariance() + "\n");		
+	}	
 
 
 }
