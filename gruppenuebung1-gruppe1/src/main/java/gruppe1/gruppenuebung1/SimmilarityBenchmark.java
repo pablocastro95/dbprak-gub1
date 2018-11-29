@@ -26,6 +26,7 @@ public class SimmilarityBenchmark extends Benchmark {
 			}
 		} catch (IOException e) {
 			success = false;
+			System.out.println(e);						
 		}
 		return success;
 	}

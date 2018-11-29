@@ -38,6 +38,7 @@ public abstract class Benchmark {
 	public BenchmarkResult run(EmbeddingRepository repo) throws SQLException {
 		BenchmarkResult result = new BenchmarkResult();
 		Random r = new Random();
+
 		for(int length = tasks.size(); length > 0; length--) {
 			int index =  r.nextInt(length);
 			BenchmarkTask randomTask = tasks.remove(index);

@@ -43,6 +43,7 @@ public class EmbeddingRepository {
 			Statement stmt = serverCon.createStatement();
 			stmt.executeUpdate("DROP DATABASE IF EXISTS nlp");
 			stmt.executeUpdate("CREATE DATABASE nlp");
+			System.out.println("Local database created!");		        			
 			stmt.close();
 			serverCon.close();
 			
@@ -57,6 +58,7 @@ public class EmbeddingRepository {
 			createTable = createTable.concat(" LENGTH double precision, ");
 			createTable = createTable.concat(" PRIMARY KEY (WORD)); ");
 			stmt.executeUpdate(createTable);
+			System.out.println("Table EMBEDDINGS created!\n");		        						
 			
 			//TODO CREATE function for cos similarity
 			
@@ -100,10 +102,12 @@ public class EmbeddingRepository {
 	public void importData(Reader in) throws SQLException{
 		String tableName = "EMBEDDINGS";
 		
+		System.out.println("Started copying data to the database...");										
 		if(con != null) {
 			try {
 				CopyManager copyManager = new CopyManager((BaseConnection) con);
 		        copyManager.copyIn("COPY " + tableName + " FROM STDIN CSV HEADER DELIMITER ';'", in);
+				System.out.println("Data successfully imported to the databsase!\n");		        
 			} catch(SQLException e) {
 				e.printStackTrace();
 			} catch(FileNotFoundException e) {
