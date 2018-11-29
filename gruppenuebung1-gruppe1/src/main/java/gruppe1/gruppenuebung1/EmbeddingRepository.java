@@ -155,7 +155,7 @@ public class EmbeddingRepository {
 		List<String> results = new ArrayList<String>();
 		long runTime = 0;
 		
-		return new QueryResult(results, runTime);
+		return new QueryResult<List<String>>(results, runTime);
 	}
 	
 	public QueryResult<Double> getCosSimilarity(String w1, String w2, boolean normalized) throws SQLException{
@@ -179,8 +179,22 @@ public class EmbeddingRepository {
 		if(rs.next()) {
 			simmilarity = rs.getDouble(1);
 		}
-		
+		rs.close();
 		
 		return new QueryResult<Double>(new Double(simmilarity), runTime);
+	}
+	
+	private void createTable() {
+		
+	}
+	
+	public void disconnect() {
+		if (con != null) {
+			try {
+				con.close();
+			} catch (SQLException e) {
+				
+			}
+		}
 	}
 }

@@ -1,7 +1,6 @@
 package gruppe1.gruppenuebung1;
 
 public class BenchmarkResult {
-	private boolean success;
 	private long minTime;
 	private double avgTime;
 	private long maxTime;
@@ -9,7 +8,6 @@ public class BenchmarkResult {
 	private double squareSum;
 	
 	public BenchmarkResult() {
-		success = false;
 		countObservations = 0;
 		squareSum = 0;
 	}

@@ -24,6 +24,7 @@ public class Gruppenuebung1_Gruppe1 {
 				System.out.println("Max: " + result.getMax());
 				System.out.println("Avg: " + result.getAvg());
 				System.out.println("Variance: " + result.getVariance());
+				repo.disconnect();
 			} catch (IOException | SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
