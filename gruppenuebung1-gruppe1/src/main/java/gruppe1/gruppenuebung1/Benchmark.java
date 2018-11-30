@@ -44,9 +44,11 @@ public abstract class Benchmark {
 		for(int length = tasks.size(); length > 0; length--) {
 			int index =  r.nextInt(length);
 			BenchmarkTask randomTask = tasks.remove(index);
-			long runTime = randomTask.run(repo);
+			TaskResult tr = randomTask.run(repo);
+			long runTime = tr.getRunTime();
+			boolean success = tr.isSuccess();
 			
-			result.addObservation(runTime);
+			result.addObservation(runTime, success);
 		}
 		return result;
 	}

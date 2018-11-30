@@ -16,6 +16,4 @@ public class QueryResult<E> {
 	public long  getRunTime() {
 		return this.runTime;
 	}
-	
-	
 }

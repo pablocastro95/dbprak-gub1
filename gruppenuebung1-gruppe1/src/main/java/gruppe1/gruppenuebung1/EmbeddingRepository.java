@@ -3,7 +3,6 @@ package gruppe1.gruppenuebung1;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
-import java.sql.Array;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -88,25 +87,39 @@ public class EmbeddingRepository {
 		}
 		returnStatement = returnStatement.substring(0, returnStatement.length() - 1);
 		returnStatement += ";";
-		String function1 = "CREATE OR REPLACE FUNCTION sim(w1 embeddings,w2 embeddings)\n"
-				+ "RETURNS double precision AS\n" + "$$\n DECLARE result double precision;" + "\n" + "BEGIN\n" + "\n"
-				+ "result = " + returnStatement + "\n return result / (w1.length * w2.length);" + "\nEND;" + "\n$$\n"
-				+ "  LANGUAGE plpgsql IMMUTABLE;";
+		String function1 = "CREATE OR REPLACE FUNCTION sim(w1 embeddings,w2 embeddings)\n" + 
+				"RETURNS double precision AS\n" + 
+				"$$\n DECLARE result double precision;" + 
+				"\n" + 
+				"BEGIN\n" + 
+				"\n" + 
+				"result = " + returnStatement + 
+				"\n return result / (w1.length * w2.length);" + 
+				"\nEND;" + 
+				"\n$$\n" + 
+				"  LANGUAGE plpgsql IMMUTABLE;";
 
-		String function2 = "CREATE OR REPLACE FUNCTION getKNearestNeighbors(IN wort character varying,IN k integer)\n"
-				+ "  RETURNS TABLE(word character varying, sim double precision) AS\n" + "$$\n DECLARE "
-				+ "entry embeddings;\n" + "\n" + "BEGIN\n"
-				+ "SELECT * FROM embeddings INTO entry where embeddings.word = wort limit 1;\n" + "\n"
-				+ "RETURN QUERY  SELECT embeddings.word, sim(embeddings.*,entry) as sim FROM embeddings where embeddings.word != wort AND length != 0\n"
-				+ "order by sim desc limit k;\n" + "\n" + "END;\n" + "$$\n" + "  LANGUAGE plpgsql;";
-
+		String function2 = "CREATE OR REPLACE FUNCTION getKNearestNeighbors(IN wort character varying,IN k integer)\n" + 
+				"  RETURNS TABLE(word character varying, sim double precision) AS\n" + 
+				"$$\n DECLARE " + 
+				"entry embeddings;\n" + 
+				"\n" + 
+				"BEGIN\n" + 
+				"SELECT * FROM embeddings INTO entry where embeddings.word = wort limit 1;\n" + 
+				"\n" + 
+				"RETURN QUERY  SELECT embeddings.word, sim(embeddings.*,entry) as sim FROM embeddings where embeddings.word != wort AND length != 0 AND entry.length != 0\n" + 
+				"order by sim desc limit k;\n" + 
+				"\n" + 
+				"END;\n" + 
+				"$$\n" + 
+				"  LANGUAGE plpgsql;";
 		String function3 = "CREATE OR REPLACE FUNCTION getknearestneighbor(entry embeddings)\r\n"
 				+ "  RETURNS TABLE(word character varying, sim double precision) AS\r\n" + "$$\r\n" + "\r\n"
 				+ "BEGIN\r\n" + "\r\n"
 				+ "RETURN QUERY  SELECT embeddings.word, sim(embeddings.*,entry) as sim FROM embeddings where length != 0\r\n"
 				+ "order by sim desc limit 1;\r\n" + "\r\n" + "END;\r\n" + "$$\r\n" + "  LANGUAGE plpgsql;";
-
-		try (Statement statement = con.createStatement()) {
+		
+		try (Statement statement = con.createStatement()){
 			statement.execute(function1);
 			statement.execute(function2);
 			statement.execute(function3);
@@ -244,7 +257,9 @@ public class EmbeddingRepository {
 		while (result.next()) {
 			results.add(new WordResult(result.getString("word"), result.getDouble("sim")));
 		}
-
+		result.close();
+		stmt.close();		
+		
 		return new QueryResult<List<WordResult>>(results, runTime);
 	}
 
@@ -269,14 +284,12 @@ public class EmbeddingRepository {
 			simmilarity = rs.getDouble(1);
 		}
 		rs.close();
-
+		stmt.close();
+		
 		return new QueryResult<Double>(new Double(simmilarity), runTime);
 	}
-
-	private void createTable() {
-
-	}
-
+	
+	
 	public void disconnect() {
 		if (con != null) {
 			try {

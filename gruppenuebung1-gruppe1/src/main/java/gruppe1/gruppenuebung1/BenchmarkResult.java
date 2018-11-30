@@ -7,14 +7,16 @@ public class BenchmarkResult {
 	private long maxTime;
 	private int countObservations;
 	private double squareSum;
+	private int countSuccessful;
 	
 	public BenchmarkResult(String benchmarkName) {
 		countObservations = 0;
+		countSuccessful = 0;
 		squareSum = 0;
 		this.benchmarkName = benchmarkName;
 	}
 	
-	public void addObservation(long runTime) {
+	public void addObservation(long runTime, boolean success) {
 		countObservations++;
 		squareSum = squareSum + Math.pow(runTime, 2);
 		if(countObservations == 1) {
@@ -28,6 +30,10 @@ public class BenchmarkResult {
 				maxTime = runTime;
 			}
 			avgTime = avgTime + (runTime - avgTime) / countObservations;
+		}
+		
+		if(success) {
+			countSuccessful++;
 		}
 		
 	}
@@ -61,7 +67,12 @@ public class BenchmarkResult {
 		System.out.println("Max: " + this.getMax());
 		System.out.println("Avg: " + this.getAvg());
 		System.out.println("Variance: " + this.getVariance() + "\n");		
-	}	
+	}
+	
+	public double getSuccessRate() {
+		double rate =((double) countSuccessful) / countObservations;
+		return rate;
+	}
 
 
 }

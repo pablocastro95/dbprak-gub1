@@ -4,6 +4,6 @@ import java.sql.SQLException;
 
 public interface BenchmarkTask {
 	
-	public long run(EmbeddingRepository repo) throws SQLException;
+	public TaskResult run(EmbeddingRepository repo) throws SQLException;
 
 }

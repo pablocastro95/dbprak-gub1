@@ -7,7 +7,7 @@ import java.io.IOException;
 
 public class AnalogyBenchmark extends Benchmark {
 
-	public AnalogyBenchmark(boolean normalized) {
+	public AnalogyBenchmark() {
 		super("AnalogyBenchmark");
 	}
 
@@ -19,7 +19,7 @@ public class AnalogyBenchmark extends Benchmark {
 			String[] words;
 			while (line != null && !line.startsWith(":")) {
 				words = line.split(" ");
-				addTask(new AnalogyTask(words[0], words[1], words[2]), 10);
+				addTask(new AnalogyTask(words[0], words[1], words[2], words[3]), 10);
 				line = reader.readLine();
 			}
 		} catch (IOException e) {
