@@ -1,5 +1,7 @@
 package gruppe1.gruppenuebung1;
 
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -8,8 +10,19 @@ import java.io.IOException;
 import java.io.Reader;
 import java.sql.SQLException;
 
+import javax.swing.JFrame;
+
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
+import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
+import org.jfree.ui.ApplicationFrame;
+
 public class Gruppenuebung1_Gruppe1 {
-	
+
 	public static void main(String[] args) {
 		EmbeddingRepository repo = EmbeddingRepository.createRepository("localhost", "5432", "postgres", "seLect14");
 		
@@ -18,6 +31,7 @@ public class Gruppenuebung1_Gruppe1 {
 			try(Reader in = new BufferedReader(new FileReader(new File("src/main/resources/out.csv")));) {
 				// Import data to local database
 				repo.importData(in);
+				
 				
 				// Execute Similarity Benchmark (Exercise 4.1)
 				System.out.println("Executing benchmark 4.1...");								
@@ -32,7 +46,11 @@ public class Gruppenuebung1_Gruppe1 {
 				bm = new ContainsBenchmark();
 				System.out.println("File vocabs_shuffled loaded with status: " + bm.importData("src/main/resources/vocabs_shuffled.txt"));
 				result= bm.run(repo);
-				result.printResults();				
+				result.printResults();
+				
+				
+				
+				
 				
 
 			} catch (IOException | SQLException e) {

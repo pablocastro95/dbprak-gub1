@@ -21,6 +21,7 @@ public class EmbeddingRepository {
 	
 	private EmbeddingRepository(Connection con) {
 			this.con = con;
+			
 	}
 	
 	/**
@@ -59,31 +60,12 @@ public class EmbeddingRepository {
 			createTable = createTable.concat(" PRIMARY KEY (WORD)); ");
 			stmt.executeUpdate(createTable);
 			System.out.println("Table EMBEDDINGS created!\n");		        						
-			
-			//TODO CREATE function for cos similarity
-			
-			//TODO Create function for 
-			String todo = "CREATE OR REPLACE FUNCTION new_order(word1 VARCHAR, word2 VARCHAR, OUT sim double precision)"
-					+ "AS '"
-					+ "DECLARE "
-						+ "count_words integer; "
-					+ "BEGIN "
-						+ "SELECT COUNT(WORD) INTO count_word FROM embeddings WHERE word = word1 OR word = word2; "
-						+ "SELECT customer.credit INTO balance FROM customer WHERE name = session_user; "
-						+ "possible := balance >= total_price; "
-						+ "SELECT MAX(id) + 1 INTO new_id FROM orders; "
-						+ "IF possible THEN "
-							+ "INSERT INTO orders VALUES (new_id, session_user, current_date, newArticle, quantity); "
-							+ "UPDATE customer SET credit = balance - total_price WHERE name = session_user; "
-						+ "END IF; "
-					+ "END;'"
-					+ "LANGUAGE PLPGSQL ";
-			
-			
-			
+						
+		
 			stmt.close();
 			repo = new EmbeddingRepository(serverCon);
-			
+			repo.createFunctionsForNearestNeighbors();
+			System.out.println("Function for receiving nearest neighbors created!");
 			
 		} catch(SQLException e) {
 			if (serverCon != null) {
@@ -97,6 +79,51 @@ public class EmbeddingRepository {
 			e.printStackTrace();
 		}
 		return repo;
+	}
+	
+	private void createFunctionsForNearestNeighbors() {
+		String returnStatement = "";
+		
+		for(int i = 1; i< 301; i++) {
+			returnStatement += "w1.DIM" + i + "* w2.DIM" + i + "+";
+		}
+		returnStatement = returnStatement.substring(0, returnStatement.length()-1);
+		returnStatement += ";";
+		String function1 = "CREATE OR REPLACE FUNCTION sim(w1 embeddings,w2 embeddings)\n" + 
+				"RETURNS double precision AS\n" + 
+				"$$\n DECLARE result double precision;" + 
+				"\n" + 
+				"BEGIN\n" + 
+				"\n" + 
+				"result = " + returnStatement + 
+				"\n return result / (w1.length * w2.length);" + 
+				"\nEND;" + 
+				"\n$$\n" + 
+				"  LANGUAGE plpgsql IMMUTABLE;";
+
+		String function2 = "CREATE OR REPLACE FUNCTION getKNearestNeighbors(IN wort character varying,IN k integer)\n" + 
+				"  RETURNS TABLE(word character varying, sim double precision) AS\n" + 
+				"$$\n DECLARE " + 
+				"entry embeddings;\n" + 
+				"\n" + 
+				"BEGIN\n" + 
+				"SELECT * FROM embeddings INTO entry where embeddings.word = wort limit 1;\n" + 
+				"\n" + 
+				"RETURN QUERY  SELECT embeddings.word, sim(embeddings.*,entry) as sim FROM embeddings where embeddings.word != wort AND length != 0\n" + 
+				"order by sim desc limit k;\n" + 
+				"\n" + 
+				"END;\n" + 
+				"$$\n" + 
+				"  LANGUAGE plpgsql;";
+		
+		try (Statement statement = con.createStatement()){
+			statement.execute(function1);
+			statement.execute(function2);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		
 	}
 	
 	public void importData(Reader in) throws SQLException{
@@ -145,7 +172,7 @@ public class EmbeddingRepository {
 		return Math.sqrt(squaredSum);
 	}
 	
-	public QueryResult<String> getAnalogousWord(String a1, String a2, String b1, boolean normalized) {
+	public QueryResult<String> getAnalogousWord(String a1, String a2, String b1) {
 		//TODO Michael
 		String result = null;
 		long runTime = 0;
@@ -153,16 +180,33 @@ public class EmbeddingRepository {
 		return new QueryResult<String>(result, runTime);
 	}
 
-	
-	public QueryResult<List<String>> getKNearestNeighbors(int k, String word, boolean normalized) {
-		//TODO Eric
-		List<String> results = new ArrayList<String>();
-		long runTime = 0;
+	/**
+	 * This method returns the k nearest neighbors of a given word using the cos similarity.
+	 * @param k
+	 * @param word 
+	 * @return
+	 * @throws SQLException
+	 */
+	public QueryResult<List<WordResult>> getKNearestNeighbors(int k, String word) throws SQLException {
 		
-		return new QueryResult<List<String>>(results, runTime);
+		PreparedStatement stmt= con.prepareStatement("SELECT * FROM getknearestneighbors(?,?);");
+		stmt.setString(1, word);
+		stmt.setInt(2, k);
+		
+		long startTime = System.currentTimeMillis();
+		ResultSet result = stmt.executeQuery();
+		long runTime = System.currentTimeMillis() - startTime;
+		
+		List<WordResult> results = new ArrayList<WordResult>();
+		
+		while (result.next()) {
+			results.add(new WordResult(result.getString("word"), result.getDouble("sim")));
+		}
+				
+		return new QueryResult<List<WordResult>>(results, runTime);
 	}
 	
-	public QueryResult<Double> getCosSimilarity(String w1, String w2, boolean normalized) throws SQLException{
+	public QueryResult<Double> getCosSimilarity(String w1, String w2) throws SQLException{
 		double simmilarity = -1;
 		
 		String cosQuery = "SELECT ";

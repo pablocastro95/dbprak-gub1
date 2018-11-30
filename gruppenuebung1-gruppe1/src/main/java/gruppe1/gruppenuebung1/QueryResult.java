@@ -1,6 +1,6 @@
 package gruppe1.gruppenuebung1;
 
-public class QueryResult<E extends Object> {
+public class QueryResult<E> {
 	private E result;
 	private long runTime;
 	
