@@ -28,5 +28,4 @@ public class AnalogyBenchmark extends Benchmark {
 		}
 		return success;
 	}
-
 }
