@@ -1,25 +1,14 @@
 package gruppe1.gruppenuebung1;
 
-import java.awt.FlowLayout;
-import java.awt.Font;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
-import javax.swing.JFrame;
-
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.CategoryAxis;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.plot.CategoryPlot;
-import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
-import org.jfree.data.statistics.BoxAndWhiskerCategoryDataset;
-import org.jfree.ui.ApplicationFrame;
 
 public class Gruppenuebung1_Gruppe1 {
 
@@ -32,26 +21,27 @@ public class Gruppenuebung1_Gruppe1 {
 				// Import data to local database
 				repo.importData(in);
 				
+				List<BenchmarkResult> results = new ArrayList<BenchmarkResult>();
+				
 				
 				// Execute Similarity Benchmark (Exercise 4.1)
 				System.out.println("Executing benchmark 4.1...");								
-				Benchmark bm = new SimmilarityBenchmark(false);
+				Benchmark bm = new SimmilarityBenchmark();
 				System.out.println("File MEN_dataset_natural_form_full loaded with status: " + bm.importData("src/main/resources/MEN_dataset_natural_form_full"));
 				BenchmarkResult result= bm.run(repo);
-
-				result.printResults();
+				results.add(result);
+				//result.printResults();
 				
 				// Execute Contains Benchmark (Exercise 4.3)
 				System.out.println("Executing benchmark 4.3...");				
 				bm = new ContainsBenchmark();
 				System.out.println("File vocabs_shuffled loaded with status: " + bm.importData("src/main/resources/vocabs_shuffled.txt"));
 				result= bm.run(repo);
-				result.printResults();
+				results.add(result);
+				//result.printResults();
 				
-				
-				
-				
-				
+				BenchmarkResultPrinter.printPerformance(results);
+				System.out.println("SUCCESS: You can view the results");
 
 			} catch (IOException | SQLException e) {
 				// TODO Auto-generated catch block

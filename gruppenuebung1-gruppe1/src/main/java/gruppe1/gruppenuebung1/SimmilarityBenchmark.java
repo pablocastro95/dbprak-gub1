@@ -6,12 +6,9 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class SimmilarityBenchmark extends Benchmark {
-	private boolean normalized;
-	
 
-	public SimmilarityBenchmark(boolean normalized) {
+	public SimmilarityBenchmark() {
 		super("SimmilarityBenchmark");
-		this.normalized = normalized;
 	}
 	
 	@Override
@@ -22,7 +19,7 @@ public class SimmilarityBenchmark extends Benchmark {
 			String[] words;
 			while(line != null) {
 				words = line.split(" ");
-				addTask(new SimmilarityTask(words[0], words[1], normalized), 10);
+				addTask(new SimmilarityTask(words[0], words[1], Double.parseDouble(words[2]) / 100), 10);
 				line = reader.readLine();
 			}
 		} catch (IOException e) {

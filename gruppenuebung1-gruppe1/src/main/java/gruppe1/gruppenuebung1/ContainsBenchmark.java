@@ -20,7 +20,7 @@ public class ContainsBenchmark extends Benchmark {
 			String[] words;
 			while(line != null) {
 				words = line.split(" ");
-				addTask(new ContainsTask(words[0]), 10);
+				addTask(new ContainsTask(words[0], true), 10);
 				line = reader.readLine();
 			}
 		} catch (IOException e) {

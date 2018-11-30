@@ -232,9 +232,6 @@ public class EmbeddingRepository {
 		return new QueryResult<Double>(new Double(simmilarity), runTime);
 	}
 	
-	private void createTable() {
-		
-	}
 	
 	public void disconnect() {
 		if (con != null) {
