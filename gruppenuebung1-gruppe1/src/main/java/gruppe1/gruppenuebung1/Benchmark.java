@@ -13,10 +13,12 @@ import java.util.Random;
  */
 public abstract class Benchmark {
 	private List<BenchmarkTask> tasks;
+	private String name;
 	
-	
-	public Benchmark() {
+
+	public Benchmark(String name) {
 		tasks = new ArrayList<BenchmarkTask>();
+		this.name = name;
 	}
 	
 	public void addTask(BenchmarkTask task, int amount) {
@@ -36,7 +38,7 @@ public abstract class Benchmark {
 	 * @throws SQLException 
 	 */
 	public BenchmarkResult run(EmbeddingRepository repo) throws SQLException {
-		BenchmarkResult result = new BenchmarkResult();
+		BenchmarkResult result = new BenchmarkResult(name);
 		Random r = new Random();
 
 		for(int length = tasks.size(); length > 0; length--) {
@@ -47,6 +49,10 @@ public abstract class Benchmark {
 			result.addObservation(runTime);
 		}
 		return result;
+	}
+	
+	public String getName() {
+		return name;
 	}
 	
 	/**

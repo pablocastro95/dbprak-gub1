@@ -5,6 +5,7 @@ public class AnalogyBenchmark extends Benchmark {
 	private boolean normalized;
 	
 	public AnalogyBenchmark(boolean normalized) {
+		super("AnalogyBenchmark");
 		this.normalized = normalized;
 	}
 

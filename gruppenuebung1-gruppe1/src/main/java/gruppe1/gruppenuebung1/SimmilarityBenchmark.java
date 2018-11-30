@@ -10,6 +10,7 @@ public class SimmilarityBenchmark extends Benchmark {
 	
 
 	public SimmilarityBenchmark(boolean normalized) {
+		super("SimmilarityBenchmark");
 		this.normalized = normalized;
 	}
 	

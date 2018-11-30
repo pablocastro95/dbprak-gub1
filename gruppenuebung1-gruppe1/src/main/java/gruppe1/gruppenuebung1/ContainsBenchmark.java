@@ -7,7 +7,9 @@ import java.io.IOException;
 
 public class ContainsBenchmark extends Benchmark {
 	
-	public ContainsBenchmark() {}	
+	public ContainsBenchmark() {
+		super("ContainsBenchmark");
+	}	
 	
 	@Override
 	public boolean importData(String filePath) {

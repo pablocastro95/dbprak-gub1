@@ -1,15 +1,17 @@
 package gruppe1.gruppenuebung1;
 
 public class BenchmarkResult {
+	private String benchmarkName;
 	private long minTime;
 	private double avgTime;
 	private long maxTime;
 	private int countObservations;
 	private double squareSum;
 	
-	public BenchmarkResult() {
+	public BenchmarkResult(String benchmarkName) {
 		countObservations = 0;
 		squareSum = 0;
+		this.benchmarkName = benchmarkName;
 	}
 	
 	public void addObservation(long runTime) {
@@ -48,6 +50,10 @@ public class BenchmarkResult {
 			variance = squareSum / countObservations - Math.pow(avgTime, 2);
 		}
 		return variance;
+	}
+	
+	public String getBenchmarkName() {
+		return benchmarkName;
 	}
 	
 	public void printResults() {
