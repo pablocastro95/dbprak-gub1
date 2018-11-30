@@ -109,7 +109,7 @@ public class EmbeddingRepository {
 				"BEGIN\n" + 
 				"SELECT * FROM embeddings INTO entry where embeddings.word = wort limit 1;\n" + 
 				"\n" + 
-				"RETURN QUERY  SELECT embeddings.word, sim(embeddings.*,entry) as sim FROM embeddings where embeddings.word != wort AND length != 0\n" + 
+				"RETURN QUERY  SELECT embeddings.word, sim(embeddings.*,entry) as sim FROM embeddings where embeddings.word != wort AND length != 0 AND entry.length != 0\n" + 
 				"order by sim desc limit k;\n" + 
 				"\n" + 
 				"END;\n" + 
@@ -202,7 +202,9 @@ public class EmbeddingRepository {
 		while (result.next()) {
 			results.add(new WordResult(result.getString("word"), result.getDouble("sim")));
 		}
-				
+		result.close();
+		stmt.close();		
+		
 		return new QueryResult<List<WordResult>>(results, runTime);
 	}
 	
@@ -228,6 +230,7 @@ public class EmbeddingRepository {
 			simmilarity = rs.getDouble(1);
 		}
 		rs.close();
+		stmt.close();
 		
 		return new QueryResult<Double>(new Double(simmilarity), runTime);
 	}

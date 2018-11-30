@@ -8,20 +8,43 @@ import java.io.Reader;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 
 public class Gruppenuebung1_Gruppe1 {
 
 	public static void main(String[] args) {
 		EmbeddingRepository repo = EmbeddingRepository.createRepository("localhost", "5432", "postgres", "seLect14");
+		System.out.print("Do you want to use normalized dataset? Please type: 'Y' for yes or 'N' for no:\n");
+		Scanner scanner = null;
+		String consoleInput = "";
+		String srcFile;
 		
+		try {
+		    scanner = new Scanner(System.in);
+		    consoleInput = scanner.nextLine();				    
+		    if(!(consoleInput.equals("Y") || consoleInput.equals("N"))) {
+				System.out.print("Invalid input, please restart the program and try again.\n");	
+			    System.exit(0);
+		    }
+		}
+		finally {
+		    if(scanner!=null)
+		        scanner.close();
+		}
+		if(consoleInput.equals("Y")) {
+			srcFile = "src/main/resources/out-normalized.csv";
+		} else {
+			srcFile = "src/main/resources/out-unnormalized.csv";
+		}
 		
 		if(repo != null) {
-			try(Reader in = new BufferedReader(new FileReader(new File("src/main/resources/out.csv")));) {
+			try(Reader in = new BufferedReader(new FileReader(new File(srcFile)));) {
 				// Import data to local database
 				repo.importData(in);
 				
 				List<BenchmarkResult> results = new ArrayList<BenchmarkResult>();
+
 				
 				
 				// Execute Similarity Benchmark (Exercise 4.1)
@@ -45,8 +68,10 @@ public class Gruppenuebung1_Gruppe1 {
 
 			} catch (IOException | SQLException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} 
+				System.out.println("Error: " + e.getMessage());
+			} finally {
+				repo.disconnect();
+			}
 			
 		} else {
 			System.out.println("Error: Could not connect to database. ");
