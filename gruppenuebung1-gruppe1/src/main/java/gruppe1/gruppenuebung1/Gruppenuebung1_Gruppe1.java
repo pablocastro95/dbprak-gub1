@@ -9,6 +9,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.sql.SQLException;
+import java.util.Scanner;
 
 import javax.swing.JFrame;
 
@@ -32,6 +33,22 @@ public class Gruppenuebung1_Gruppe1 {
 				// Import data to local database
 				repo.importData(in);
 				
+				System.out.print("Do you want to use normalized dataset? Please type: 'Y' for yes or 'N' for no:\n");
+				Scanner scanner = null;
+				String consoleInput = "";
+				try {
+				    scanner = new Scanner(System.in);
+				    consoleInput = scanner.nextLine();				    
+				    if(!(consoleInput.equals("Y") || consoleInput.equals("N"))) {
+						System.out.print("Invalid input, please restart the program and try again.\n");	
+					    System.exit(0);
+				    }
+				}
+				finally {
+				    if(scanner!=null)
+				        scanner.close();
+				}
+				boolean normalized = consoleInput.equals("Y") ? true : false;
 				
 				// Execute Similarity Benchmark (Exercise 4.1)
 				System.out.println("Executing benchmark 4.1...");								
