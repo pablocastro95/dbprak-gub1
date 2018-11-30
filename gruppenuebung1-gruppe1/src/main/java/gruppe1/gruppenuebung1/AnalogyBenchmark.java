@@ -1,21 +1,31 @@
 package gruppe1.gruppenuebung1;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+
 public class AnalogyBenchmark extends Benchmark {
-	
-	private boolean normalized;
-	
+
 	public AnalogyBenchmark(boolean normalized) {
 		super("AnalogyBenchmark");
-		this.normalized = normalized;
 	}
 
 	@Override
 	public boolean importData(String filePath) {
 		boolean success = true;
-		// TODO Michael
-		
-		//for every line in doc
-		//	addTask(new AnalogyTask(w1, w2, w3, normalized), 10)
+		try (BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)))) {
+			String line = reader.readLine();
+			String[] words;
+			while (line != null && !line.startsWith(":")) {
+				words = line.split(" ");
+				addTask(new AnalogyTask(words[0], words[1], words[2]), 10);
+				line = reader.readLine();
+			}
+		} catch (IOException e) {
+			success = false;
+			System.out.println(e);
+		}
 		return success;
 	}
 
