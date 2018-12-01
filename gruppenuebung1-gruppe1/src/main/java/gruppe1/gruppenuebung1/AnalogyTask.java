@@ -2,8 +2,6 @@ package gruppe1.gruppenuebung1;
 
 import java.sql.SQLException;
 
-import org.postgresql.util.PSQLException;
-
 public class AnalogyTask implements BenchmarkTask {
 	private String a1;
 	private String a2;
@@ -21,6 +19,10 @@ public class AnalogyTask implements BenchmarkTask {
 	public TaskResult run(EmbeddingRepository repo) throws SQLException {
 		QueryResult<String> result = repo.getAnalogousWord(a1, a2, b1);
 		boolean success = result.getResult().equals(expectedB2);
+		System.out.println("Task run. Success: " + success);
+		if(!success) {
+			System.out.println(result.getResult() + " vs " + expectedB2);
+		}
 		return new TaskResult(result.getRunTime(), success);
 	}
 

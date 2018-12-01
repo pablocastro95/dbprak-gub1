@@ -83,15 +83,20 @@ public class EmbeddingRepository {
 	private void createFunctionsForNearestNeighbors() {
 		String returnStatement = "";
 		String analogySelect = "";
+		String lengthAttribute = "SQRT(";
 
 		for (int i = 1; i < 301; i++) {
 			returnStatement += "w1.DIM" + i + "* w2.DIM" + i + "+";
-			analogySelect += "a2.DIM" + i + " - a1.dim" + i + " + b1.dim" + i + ",";
+			analogySelect += "(a2.DIM" + i + " - a1.dim" + i + " + b1.dim" + i + ") AS DIM" + i + ",";
+			lengthAttribute += "pow(b2.DIM" + i + ", 2.0) + ";
 		}
 		returnStatement = returnStatement.substring(0, returnStatement.length() - 1);
 		returnStatement += ";";
 		
 		analogySelect = analogySelect.substring(0, analogySelect.length() - 1);
+		
+		lengthAttribute = lengthAttribute.substring(0, lengthAttribute.length() - 2);
+		lengthAttribute += ")";
 		
 		String function1 = "CREATE OR REPLACE FUNCTION sim(w1 embeddings,w2 embeddings)\n" + 
 				"RETURNS double precision AS\n" + 
@@ -133,17 +138,32 @@ public class EmbeddingRepository {
 				"	ELSE\r\n" + 
 				"		SELECT '', " + analogySelect + " INTO b2\r\n" + 
 				"		FROM embeddings a1, embeddings a2, embeddings b1\r\n" + 
-				"		WHERE a1.word = a1w AND a2.word = a2w AND b1.word =b1w;\r\n" + 
+				"		WHERE a1.word = a1w AND a2.word = a2w AND b1.word =b1w;\r\n" +
+				"       SELECT "+ lengthAttribute + " INTO b2.length;" +
 				"	END IF;\r\n" + 
 				"																			   \r\n" + 
 				"																			   \r\n" + 
 				"	RETURN QUERY  SELECT embeddings.word, sim(embeddings.*,b2) as sim FROM embeddings where length != 0 order by sim desc limit 1;\r\n" + 
 				"END;$$\r\n" + 
 				"LANGUAGE PLPGSQL;";
-		
+		String function4 = 
+				"CREATE OR REPLACE FUNCTION getLength(vector embeddings)\n" + 
+				"  RETURNS double precision AS\n" + 
+				"$$\n DECLARE " + 
+				"result double precision;\n" + 
+				"\n" + 
+				"BEGIN\n" + 
+				"SELECT "+lengthAttribute +"  FROM vector INTO result;\n" + 
+				"\n" + 
+				"RETURN result;\n" + 
+				"\n" + 
+				"END;\n" + 
+				"$$\n" + 
+				"  LANGUAGE plpgsql;";
 		try (Statement statement = con.createStatement()){
 			statement.execute(function1);
 			statement.execute(function2);
+			statement.execute(function4);
 			statement.execute(function3);
 		} catch (SQLException e) {
 			e.printStackTrace();

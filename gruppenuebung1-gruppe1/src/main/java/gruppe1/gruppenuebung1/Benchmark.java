@@ -2,10 +2,9 @@ package gruppe1.gruppenuebung1;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
-import org.postgresql.util.PSQLException;
 
 /**
  * A generic Benchmark-structure, which contains Tasks and runs them on a 
@@ -41,11 +40,8 @@ public abstract class Benchmark {
 	 */
 	public BenchmarkResult run(EmbeddingRepository repo) {
 		BenchmarkResult result = new BenchmarkResult(name);
-		Random r = new Random();
-
-		for(int length = tasks.size(); length > 0; length--) {
-			int index =  r.nextInt(length);
-			BenchmarkTask randomTask = tasks.remove(index);
+		Collections.shuffle(tasks);
+		for(BenchmarkTask randomTask: tasks) {
 			try {
 				TaskResult tr = randomTask.run(repo);
 				long runTime = tr.getRunTime();
@@ -54,6 +50,7 @@ public abstract class Benchmark {
 				result.addObservation(runTime, success);
 			} catch (SQLException e) {
 				System.out.println("Exception catched");
+				e.printStackTrace();
 			}
 		}
 		return result;
