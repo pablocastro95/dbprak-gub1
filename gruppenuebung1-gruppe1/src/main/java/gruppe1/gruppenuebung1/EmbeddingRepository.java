@@ -79,14 +79,20 @@ public class EmbeddingRepository {
 		return repo;
 	}
 
+
 	private void createFunctionsForNearestNeighbors() {
 		String returnStatement = "";
+		String analogySelect = "";
 
 		for (int i = 1; i < 301; i++) {
 			returnStatement += "w1.DIM" + i + "* w2.DIM" + i + "+";
+			analogySelect += "a2.DIM" + i + " - a1.dim" + i + " + b1.dim" + i + ",";
 		}
 		returnStatement = returnStatement.substring(0, returnStatement.length() - 1);
 		returnStatement += ";";
+		
+		analogySelect = analogySelect.substring(0, analogySelect.length() - 1);
+		
 		String function1 = "CREATE OR REPLACE FUNCTION sim(w1 embeddings,w2 embeddings)\n" + 
 				"RETURNS double precision AS\n" + 
 				"$$\n DECLARE result double precision;" + 
@@ -113,11 +119,27 @@ public class EmbeddingRepository {
 				"END;\n" + 
 				"$$\n" + 
 				"  LANGUAGE plpgsql;";
-		String function3 = "CREATE OR REPLACE FUNCTION getknearestneighbor(entry embeddings)\r\n"
-				+ "  RETURNS TABLE(word character varying, sim double precision) AS\r\n" + "$$\r\n" + "\r\n"
-				+ "BEGIN\r\n" + "\r\n"
-				+ "RETURN QUERY  SELECT embeddings.word, sim(embeddings.*,entry) as sim FROM embeddings where length != 0\r\n"
-				+ "order by sim desc limit 1;\r\n" + "\r\n" + "END;\r\n" + "$$\r\n" + "  LANGUAGE plpgsql;";
+		String function3 = "CREATE OR REPLACE FUNCTION getAnalogousWord(a1w varchar, a2w varchar, b1w varchar) \r\n" + 
+				"RETURNS TABLE(word character varying, sim double precision) AS\r\n" + 
+				"$$ DECLARE\r\n" + 
+				"	contains integer;\r\n" + 
+				"	distinctWords integer;\r\n" + 
+				"	b2 embeddings;\r\n" + 
+				"BEGIN\r\n" + 
+				"	SELECT count(DISTINCT input.word) INTO distinctWords FROM (Values (a1w), (a2w), (b1w)) input (word);\r\n" + 
+				"	SELECT count(embeddings.word) INTO contains FROM embeddings WHERE embeddings.word=a1w OR embeddings.word=a2w OR embeddings.word=b1w;\r\n" + 
+				"	IF contains <  distinctWords THEN\r\n" + 
+				"		RAISE 'missing word %', contains; \r\n" + 
+				"	ELSE\r\n" + 
+				"		SELECT '', " + analogySelect + " INTO b2\r\n" + 
+				"		FROM embeddings a1, embeddings a2, embeddings b1\r\n" + 
+				"		WHERE a1.word = a1w AND a2.word = a2w AND b1.word =b1w;\r\n" + 
+				"	END IF;\r\n" + 
+				"																			   \r\n" + 
+				"																			   \r\n" + 
+				"	RETURN QUERY  SELECT embeddings.word, sim(embeddings.*,b2) as sim FROM embeddings where length != 0 order by sim desc limit 1;\r\n" + 
+				"END;$$\r\n" + 
+				"LANGUAGE PLPGSQL;";
 		
 		try (Statement statement = con.createStatement()){
 			statement.execute(function1);
@@ -160,77 +182,32 @@ public class EmbeddingRepository {
 		return new QueryResult<Boolean>(new Boolean(contains), runTime);
 	}
 
-	public double getVectorNorm(String word) throws SQLException {
-		PreparedStatement stmt = con.prepareStatement("SELECT * FROM EMBEDDINGS WHERE word=?");
-		stmt.setString(1, word);
-		ResultSet rs = stmt.executeQuery();
-		rs.next();
 
-		double squaredSum = 0;
-		for (int i = 1; i < 301; i++) {
-			squaredSum = squaredSum + Math.pow(rs.getDouble("DIM" + i), 2);
-		}
-		rs.close();
-		stmt.close();
-		return Math.sqrt(squaredSum);
-	}
-
-	public QueryResult<String> getAnalogousWord(String a1, String a2, String b1) {
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("SELECT ");
-		for (int i = 1; i <= 300; i++) {
-			stringBuilder.append("SUM(dim" + i + ")");
-			if (i != 300) {
-				stringBuilder.append(", ");
-			}
-		}
-		stringBuilder.append(" FROM embeddings\r\n" + "WHERE word = ?\r\n" + "OR word = ?");
-		Double[] vector = new Double[300];
-		try (PreparedStatement preparedStatement = con.prepareStatement(stringBuilder.toString())) {
-			preparedStatement.setString(1, a2);
-			preparedStatement.setString(2, b1);
-			long start = System.currentTimeMillis();
-			ResultSet resultSet = preparedStatement.executeQuery();
-			long end = System.currentTimeMillis();
-			if (resultSet.next()) {
-				for (int i = 0; i < vector.length; i++) {
-					vector[i] = resultSet.getDouble((i + 1));
-				}
-
-				String sql = "SELECT * FROM embeddings where word = ?";
+	public QueryResult<String> getAnalogousWord(String a1, String a2, String b1) throws SQLException {
+		String result = null;
+				String sql = "SELECT * FROM getAnalogousWord(?, ?, ?)";
 				PreparedStatement preparedStatement2 = con.prepareStatement(sql);
 				preparedStatement2.setString(1, a1);
-				ResultSet result = preparedStatement2.executeQuery();
-
-				if (!result.next()) {
-					throw new SQLException("No result found!");
+				preparedStatement2.setString(2, a2);
+				preparedStatement2.setString(3, b1);
+				long start = System.currentTimeMillis();
+			try {
+				
+				ResultSet rs = preparedStatement2.executeQuery();
+				if(rs.next()) {
+					result = rs.getString(1);
 				}
-				for (int i = 0; i < 300; i++) {
-					vector[i] -= result.getDouble((i + 2));
-				}
-
-				String neighbor = "('',";
-
-				for (int i = 0; i < 300; i++) {
-					neighbor += vector[i] + ",";
-				}
-				neighbor += "1)::embeddings";
-				Statement statement = con.createStatement();
-				String string = "SELECT * FROM getknearestneighbor(" + neighbor + ")";
-				ResultSet finalResult = statement.executeQuery(string);
-				finalResult.next();
-
-				resultSet.close();
+				rs.close();
+			} catch (SQLException e) {
+				throw e;
+			} finally {
+				
 				preparedStatement2.close();
-				result.close();
-				return new QueryResult<String>(finalResult.getString(1), start - end);
-			} else {
-				System.out.println("No analogy found");
 			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		return null;
+			
+			long end = System.currentTimeMillis();
+			
+		return new QueryResult<String>(result, start - end);
 	}
 
 	/**

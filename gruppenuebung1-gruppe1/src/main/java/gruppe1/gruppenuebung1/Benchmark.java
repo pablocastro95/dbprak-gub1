@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.postgresql.util.PSQLException;
+
 /**
  * A generic Benchmark-structure, which contains Tasks and runs them on a 
  * EmbeddingRepository to determine it's performance.
@@ -37,18 +39,22 @@ public abstract class Benchmark {
 	 * @return An object containing information about the performance of the tasks.
 	 * @throws SQLException 
 	 */
-	public BenchmarkResult run(EmbeddingRepository repo) throws SQLException {
+	public BenchmarkResult run(EmbeddingRepository repo) {
 		BenchmarkResult result = new BenchmarkResult(name);
 		Random r = new Random();
 
 		for(int length = tasks.size(); length > 0; length--) {
 			int index =  r.nextInt(length);
 			BenchmarkTask randomTask = tasks.remove(index);
-			TaskResult tr = randomTask.run(repo);
-			long runTime = tr.getRunTime();
-			boolean success = tr.isSuccess();
-			
-			result.addObservation(runTime, success);
+			try {
+				TaskResult tr = randomTask.run(repo);
+				long runTime = tr.getRunTime();
+				boolean success = tr.isSuccess();
+				
+				result.addObservation(runTime, success);
+			} catch (SQLException e) {
+				System.out.println("Exception catched");
+			}
 		}
 		return result;
 	}

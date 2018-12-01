@@ -17,9 +17,11 @@ public class AnalogyBenchmark extends Benchmark {
 		try (BufferedReader reader = new BufferedReader(new FileReader(new File(filePath)))) {
 			String line = reader.readLine();
 			String[] words;
-			while (line != null && !line.startsWith(":")) {
-				words = line.split(" ");
-				addTask(new AnalogyTask(words[0], words[1], words[2], words[3]), 10);
+			while (line != null) {
+				if(!line.startsWith(":")) {
+					words = line.split(" ");
+					addTask(new AnalogyTask(words[0], words[1], words[2], words[3]), 1); //Reduced amount of tasks added per line to one 
+				}
 				line = reader.readLine();
 			}
 		} catch (IOException e) {

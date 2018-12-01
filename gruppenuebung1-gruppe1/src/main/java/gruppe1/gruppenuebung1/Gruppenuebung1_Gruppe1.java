@@ -27,15 +27,15 @@ public class Gruppenuebung1_Gruppe1 {
 				System.out.print("Invalid input, please restart the program and try again.\n");	
 			    System.exit(0);
 		    }
+		    if(consoleInput.equals("Y")) {
+				srcFile = "src/main/resources/out-normalized.csv";
+			} else {
+				srcFile = "src/main/resources/out-unnormalized.csv";
+			}
 		}
 		finally {
 		    if(scanner!=null)
 		        scanner.close();
-		}
-		if(consoleInput.equals("Y")) {
-			srcFile = "src/main/resources/out-normalized.csv";
-		} else {
-			srcFile = "src/main/resources/out-unnormalized.csv";
 		}
 		
 		if(repo != null) {
@@ -50,15 +50,15 @@ public class Gruppenuebung1_Gruppe1 {
 				// Execute Similarity Benchmark (Exercise 4.1)
 				System.out.println("Executing benchmark 4.1...");								
 				Benchmark bm = new SimmilarityBenchmark();
-				System.out.println("File MEN_dataset_natural_form_full loaded with status: " + bm.importData("src/main/resources/MEN_dataset_natural_form_full"));
-				BenchmarkResult result= bm.run(repo);
-				results.add(result);
+//				System.out.println("File MEN_dataset_natural_form_full loaded with status: " + bm.importData("src/main/resources/MEN_dataset_natural_form_full"));
+//				BenchmarkResult result= bm.run(repo);
+//				results.add(result);
 				
 				// Execute Contains Benchmark (Exercise 4.2)
 				System.out.println("Executing benchmark 4.2...");
 				bm = new AnalogyBenchmark();
 				System.out.println("File vocabs_shuffled loaded with status: " + bm.importData("src/main/resources/questions-words.txt"));
-				result= bm.run(repo);
+BenchmarkResult				result= bm.run(repo);
 				results.add(result);
 				
 				// Execute Contains Benchmark (Exercise 4.3)

@@ -2,6 +2,8 @@ package gruppe1.gruppenuebung1;
 
 import java.sql.SQLException;
 
+import org.postgresql.util.PSQLException;
+
 public class AnalogyTask implements BenchmarkTask {
 	private String a1;
 	private String a2;
