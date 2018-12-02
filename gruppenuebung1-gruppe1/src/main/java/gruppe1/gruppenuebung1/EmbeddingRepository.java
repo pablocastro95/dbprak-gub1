@@ -77,7 +77,6 @@ public class EmbeddingRepository {
 		return repo;
 	}
 
-
 	private void createFunctionsForNearestNeighbors() {
 		String returnStatement = "";
 		String analogySelect = "";
@@ -148,30 +147,28 @@ public class EmbeddingRepository {
 			statement.execute(function1);
 			statement.execute(function2);
 			statement.execute(function3);
-			simStatement = con.prepareStatement("SELECT " + returnStatement + " FROM embeddings w1, embeddings w2 WHERE w1.word=? AND w2.word=?");
+			simStatement = con.prepareStatement("SELECT (" + returnStatement + ") / (w1.length * w2.length) FROM embeddings w1, embeddings w2 WHERE w1.word=? AND w2.word=?");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 
 	}
 
-	public void importData(Reader in) throws SQLException {
+	public boolean importData(Reader in) throws SQLException {
 		String tableName = "EMBEDDINGS";
+		boolean success = false;
 
-		System.out.println("Started copying data to the database...");
 		if (con != null) {
 			try {
 				CopyManager copyManager = new CopyManager((BaseConnection) con);
 				copyManager.copyIn("COPY " + tableName + " FROM STDIN CSV HEADER DELIMITER ';'", in);
-				System.out.println("Data successfully imported to the databsase!\n");
+				success = true;
 			} catch (SQLException e) {
-				e.printStackTrace();
 			} catch (FileNotFoundException e) {
-				e.printStackTrace();
 			} catch (IOException e) {
-				e.printStackTrace();
 			}
 		}
+		return success;
 	}
 
 	public QueryResult<Boolean> containsWord(String word) throws SQLException {
