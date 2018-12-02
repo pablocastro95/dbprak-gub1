@@ -39,7 +39,7 @@ public class Gruppenuebung1_Gruppe1 {
 					results.add(result);
 				}
 				
-				result = runBenchmark("BENCHMARK 4.2: Analogy", new AnalogyBenchmark(), "src/main/resources/questions-words.txt", repo);
+				result = runBenchmark("BENCHMARK 4.2: Analogy (20 mins, 500 tests)", new AnalogyBenchmark(), "src/main/resources/questions-words.txt", repo);
 				if(result != null) {
 					results.add(result);
 				}

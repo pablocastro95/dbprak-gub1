@@ -210,7 +210,6 @@ public class EmbeddingRepository {
 			}
 			
 			long runtime = System.currentTimeMillis() - start;
-			System.out.println(runtime);
 			
 		return new QueryResult<String>(result, runtime);
 	}
