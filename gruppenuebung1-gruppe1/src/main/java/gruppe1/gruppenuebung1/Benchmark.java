@@ -49,7 +49,6 @@ public abstract class Benchmark {
 				
 				result.addObservation(runTime, success);
 			} catch (SQLException e) {
-				System.out.println("Exception catched");
 			}
 		}
 		return result;

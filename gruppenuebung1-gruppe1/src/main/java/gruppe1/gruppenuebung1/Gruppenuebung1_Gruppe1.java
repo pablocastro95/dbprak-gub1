@@ -14,7 +14,59 @@ import java.util.Scanner;
 public class Gruppenuebung1_Gruppe1 {
 
 	public static void main(String[] args) {
+		System.out.print("Setup: connecting to database..");
 		EmbeddingRepository repo = EmbeddingRepository.createRepository("localhost", "5432", "postgres", "seLect14");
+		
+		
+		if(repo != null) {
+			System.out.println("SUCCESS");
+			System.out.println();
+			
+			String srcFile = chooseImportData();
+			
+			
+			try(Reader in = new BufferedReader(new FileReader(new File(srcFile)));) {
+				// Import data to local database
+				repo.importData(in);
+				
+				List<BenchmarkResult> results = new ArrayList<BenchmarkResult>();
+				
+				
+				// Execute Similarity Benchmark (Exercise 4.1)
+				BenchmarkResult result = null;
+				result = runBenchmark("BENCHMARK 4.1: Simmilarity", new SimmilarityBenchmark(), "src/main/resources/MEN_dataset_natural_form_full", repo);
+				if(result != null) {
+					results.add(result);
+				}
+				
+				result = runBenchmark("BENCHMARK 4.2: Analogy", new AnalogyBenchmark(), "src/main/resources/questions-words.txt", repo);
+				if(result != null) {
+					results.add(result);
+				}
+				
+				result = runBenchmark("BENCHMARK 4.3: Contains", new ContainsBenchmark(),  "src/main/resources/vocabs_shuffled.txt", repo);
+				if(result != null) {
+					results.add(result);
+				}
+				
+				BenchmarkResultPrinter.printPerformance(results);
+				System.out.println("SUCCESS: You can view the results");
+
+			} catch (IOException | SQLException e) {
+				// TODO Auto-generated catch block
+				System.out.println("Error: " + e.getMessage());
+			} finally {
+				repo.disconnect();
+			}
+			
+		} else {
+			System.out.println("FAIL");
+			System.out.println("Error: Could not connect to database. ");
+		}
+
+	}
+	
+	private static String chooseImportData() {
 		System.out.print("Do you want to use normalized dataset? Please type: 'Y' for yes or 'N' for no:\n");
 		Scanner scanner = null;
 		String consoleInput = "";
@@ -37,52 +89,31 @@ public class Gruppenuebung1_Gruppe1 {
 		    if(scanner!=null)
 		        scanner.close();
 		}
-		
-		if(repo != null) {
-			try(Reader in = new BufferedReader(new FileReader(new File(srcFile)));) {
-				// Import data to local database
-				repo.importData(in);
-				
-				List<BenchmarkResult> results = new ArrayList<BenchmarkResult>();
-
-				
-				
-				// Execute Similarity Benchmark (Exercise 4.1)
-				System.out.println("Executing benchmark 4.1...");								
-				Benchmark bm = new SimmilarityBenchmark();
-//				System.out.println("File MEN_dataset_natural_form_full loaded with status: " + bm.importData("src/main/resources/MEN_dataset_natural_form_full"));
-//				BenchmarkResult result= bm.run(repo);
-//				results.add(result);
-				
-				// Execute Contains Benchmark (Exercise 4.2)
-				System.out.println("Executing benchmark 4.2...");
-				bm = new AnalogyBenchmark();
-				System.out.println("File vocabs_shuffled loaded with status: " + bm.importData("src/main/resources/questions-words.txt"));
-BenchmarkResult				result= bm.run(repo);
-				results.add(result);
-				
-				// Execute Contains Benchmark (Exercise 4.3)
-				System.out.println("Executing benchmark 4.3...");
-				bm = new ContainsBenchmark();
-				System.out.println("File vocabs_shuffled loaded with status: " + bm.importData("src/main/resources/vocabs_shuffled.txt"));
-				result= bm.run(repo);
-				results.add(result);
-				
-				
-				BenchmarkResultPrinter.printPerformance(results);
-				System.out.println("SUCCESS: You can view the results");
-
-			} catch (IOException | SQLException e) {
-				// TODO Auto-generated catch block
-				System.out.println("Error: " + e.getMessage());
-			} finally {
-				repo.disconnect();
+		return srcFile;
+	}
+	
+	private static BenchmarkResult runBenchmark(String bmName, Benchmark bm, String filePath, EmbeddingRepository repo) {
+		BenchmarkResult result = null;
+		System.out.println(bmName);								
+		System.out.print("Importing Tasks..");
+		boolean importSuccess = bm.importData(filePath);
+		if (importSuccess) {
+			System.out.println("SUCCESS");
+			System.out.print("Running Tasks...");
+			result= bm.run(repo);
+			if (result != null) {
+				System.out.println("SUCCESS");
+			} else {
+				System.out.println("FAIL");
 			}
-			
 		} else {
-			System.out.println("Error: Could not connect to database. ");
-		}
-
+			System.out.println("FAIL");
+			System.out.println("Benchmark will be skipped due to error importing the tasks.");
+			
+		} 
+		System.out.println();
+		return result;
+		
 	}
 
 }

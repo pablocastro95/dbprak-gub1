@@ -25,26 +25,27 @@ public class BenchmarkResultPrinter {
 		
 		
 		
-		DefaultCategoryDataset cd = new DefaultCategoryDataset();
-		for(BenchmarkResult pm: results) {
-			cd.addValue(pm.getMin(), "min", pm.getBenchmarkName());
-			cd.addValue(pm.getAvg(), "avg", pm.getBenchmarkName());
-			cd.addValue(pm.getMax(), "max", pm.getBenchmarkName());
-			cd.addValue(pm.getVariance(), "var", pm.getBenchmarkName());
+		DefaultCategoryDataset performanceData = new DefaultCategoryDataset();
+		DefaultCategoryDataset successData = new DefaultCategoryDataset();
+		String bmName;
+		for(BenchmarkResult bm: results) {
+			if (bm != null) {
+				bmName = bm.getBenchmarkName();
+				performanceData.addValue(bm.getMin(), "min", bmName);
+				performanceData.addValue(bm.getAvg(), "avg", bmName);
+				performanceData.addValue(bm.getMax(), "max", bmName);
+				performanceData.addValue(bm.getVariance(), "var", bmName);
+				successData.addValue(bm.getSuccessRate(), "success rate", bmName);
+			}
+			
 		}
 		
-		JFreeChart chart = ChartFactory.createBarChart("Performance Results", "Benchmark", "Milliseconds", cd);
+		JFreeChart chart = ChartFactory.createBarChart("Performance Results", "Benchmark", "Milliseconds", performanceData);
 		frm.add(new ChartPanel(chart));
 		
-		
-		cd = new DefaultCategoryDataset();
-		for(BenchmarkResult pm: results) {
-			cd.addValue(pm.getSuccessRate(), "success rate", pm.getBenchmarkName());
-		}
-		
-		chart = ChartFactory.createBarChart("Success Rate", "Benchmark", "Success Rate", cd);
-				
+		chart = ChartFactory.createBarChart("Success Rate", "Benchmark", "Success Rate", successData);
 		frm.add(new ChartPanel(chart));
+		
 		frm.setVisible(true);
 		
 

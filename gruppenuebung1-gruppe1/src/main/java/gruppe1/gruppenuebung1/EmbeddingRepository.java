@@ -17,6 +17,7 @@ import org.postgresql.core.BaseConnection;
 
 public class EmbeddingRepository {
 	private Connection con;
+	private PreparedStatement simStatement;
 
 	private EmbeddingRepository(Connection con) {
 		this.con = con;
@@ -43,7 +44,6 @@ public class EmbeddingRepository {
 			Statement stmt = serverCon.createStatement();
 			stmt.executeUpdate("DROP DATABASE IF EXISTS nlp");
 			stmt.executeUpdate("CREATE DATABASE nlp");
-			System.out.println("Local database created!");
 			stmt.close();
 			serverCon.close();
 
@@ -58,14 +58,13 @@ public class EmbeddingRepository {
 			createTable = createTable.concat(" LENGTH double precision, ");
 			createTable = createTable.concat(" PRIMARY KEY (WORD)); ");
 			stmt.executeUpdate(createTable);
-			System.out.println("Table EMBEDDINGS created!\n");
 
 			stmt.close();
 			repo = new EmbeddingRepository(serverCon);
 			repo.createFunctionsForNearestNeighbors();
-			System.out.println("Function for receiving nearest neighbors created!");
 
 		} catch (SQLException e) {
+			repo = null;
 			if (serverCon != null) {
 				try {
 					serverCon.close();
@@ -74,7 +73,6 @@ public class EmbeddingRepository {
 				}
 
 			}
-			e.printStackTrace();
 		}
 		return repo;
 	}
@@ -91,7 +89,6 @@ public class EmbeddingRepository {
 			lengthAttribute += "pow(b2.DIM" + i + ", 2.0) + ";
 		}
 		returnStatement = returnStatement.substring(0, returnStatement.length() - 1);
-		returnStatement += ";";
 		
 		analogySelect = analogySelect.substring(0, analogySelect.length() - 1);
 		
@@ -104,7 +101,7 @@ public class EmbeddingRepository {
 				"\n" + 
 				"BEGIN\n" + 
 				"\n" + 
-				"result = " + returnStatement + 
+				"result = " + returnStatement + ";" +
 				"\n return result / (w1.length * w2.length);" + 
 				"\nEND;" + 
 				"\n$$\n" + 
@@ -151,6 +148,7 @@ public class EmbeddingRepository {
 			statement.execute(function1);
 			statement.execute(function2);
 			statement.execute(function3);
+			simStatement = con.prepareStatement("SELECT " + returnStatement + " FROM embeddings w1, embeddings w2 WHERE w1.word=? AND w2.word=?");
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -211,9 +209,10 @@ public class EmbeddingRepository {
 				preparedStatement2.close();
 			}
 			
-			long end = System.currentTimeMillis();
+			long runtime = System.currentTimeMillis() - start;
+			System.out.println(runtime);
 			
-		return new QueryResult<String>(result, start - end);
+		return new QueryResult<String>(result, runtime);
 	}
 
 	/**
@@ -249,25 +248,18 @@ public class EmbeddingRepository {
 	public QueryResult<Double> getCosSimilarity(String w1, String w2) throws SQLException {
 		double simmilarity = -1;
 
-		String cosQuery = "SELECT ";
-		for (int i = 1; i < 301; i++) {
-			cosQuery += "w1.DIM" + i + "* w2.DIM" + i + "+";
-		}
-		cosQuery += "0 FROM embeddings w1, embeddings w2 WHERE w1.word=? AND w2.word=?";
-
-		PreparedStatement stmt = con.prepareStatement(cosQuery);
-		stmt.setString(1, w1);
-		stmt.setString(2, w2);
+		
+		simStatement.setString(1, w1);
+		simStatement.setString(2, w2);
 
 		long startTime = System.currentTimeMillis();
-		ResultSet rs = stmt.executeQuery();
+		ResultSet rs = simStatement.executeQuery();
 		long runTime = System.currentTimeMillis() - startTime;
 
 		if (rs.next()) {
 			simmilarity = rs.getDouble(1);
 		}
 		rs.close();
-		stmt.close();
 		
 		return new QueryResult<Double>(new Double(simmilarity), runTime);
 	}
@@ -276,6 +268,7 @@ public class EmbeddingRepository {
 	public void disconnect() {
 		if (con != null) {
 			try {
+				simStatement.close();
 				con.close();
 			} catch (SQLException e) {
 
