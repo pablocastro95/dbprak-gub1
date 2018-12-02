@@ -87,7 +87,7 @@ public class EmbeddingRepository {
 
 		for (int i = 1; i < 301; i++) {
 			returnStatement += "w1.DIM" + i + "* w2.DIM" + i + "+";
-			analogySelect += "(a2.DIM" + i + " - a1.dim" + i + " + b1.dim" + i + ") AS DIM" + i + ",";
+			analogySelect += "(a2.DIM" + i + " - a1.DIM" + i + " + b1.DIM" + i + ") AS DIM" + i + ",";
 			lengthAttribute += "pow(b2.DIM" + i + ", 2.0) + ";
 		}
 		returnStatement = returnStatement.substring(0, returnStatement.length() - 1);
@@ -146,24 +146,10 @@ public class EmbeddingRepository {
 				"	RETURN QUERY  SELECT embeddings.word, sim(embeddings.*,b2) as sim FROM embeddings where length != 0 order by sim desc limit 1;\r\n" + 
 				"END;$$\r\n" + 
 				"LANGUAGE PLPGSQL;";
-		String function4 = 
-				"CREATE OR REPLACE FUNCTION getLength(vector embeddings)\n" + 
-				"  RETURNS double precision AS\n" + 
-				"$$\n DECLARE " + 
-				"result double precision;\n" + 
-				"\n" + 
-				"BEGIN\n" + 
-				"SELECT "+lengthAttribute +"  FROM vector INTO result;\n" + 
-				"\n" + 
-				"RETURN result;\n" + 
-				"\n" + 
-				"END;\n" + 
-				"$$\n" + 
-				"  LANGUAGE plpgsql;";
+
 		try (Statement statement = con.createStatement()){
 			statement.execute(function1);
 			statement.execute(function2);
-			statement.execute(function4);
 			statement.execute(function3);
 		} catch (SQLException e) {
 			e.printStackTrace();

@@ -19,10 +19,7 @@ public class AnalogyTask implements BenchmarkTask {
 	public TaskResult run(EmbeddingRepository repo) throws SQLException {
 		QueryResult<String> result = repo.getAnalogousWord(a1, a2, b1);
 		boolean success = result.getResult().equals(expectedB2);
-		System.out.println("Task run. Success: " + success);
-		if(!success) {
-			System.out.println(result.getResult() + " vs " + expectedB2);
-		}
+		System.out.println("Task run. Success: " + success + "(" + result.getResult() +" vs. " + expectedB2 + ")");
 		return new TaskResult(result.getRunTime(), success);
 	}
 
