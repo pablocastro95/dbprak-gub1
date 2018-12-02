@@ -134,7 +134,7 @@ public class EmbeddingRepository {
 				"	SELECT count(DISTINCT input.word) INTO distinctWords FROM (Values (a1w), (a2w), (b1w)) input (word);\r\n" + 
 				"	SELECT count(embeddings.word) INTO contains FROM embeddings WHERE embeddings.word=a1w OR embeddings.word=a2w OR embeddings.word=b1w;\r\n" + 
 				"	IF contains <  distinctWords THEN\r\n" + 
-				"		RAISE 'missing word %', contains; \r\n" + 
+				"		RAISE 'missing % word(s)', distinctWords - contains; \r\n" + 
 				"	ELSE\r\n" + 
 				"		SELECT '', " + analogySelect + " INTO b2\r\n" + 
 				"		FROM embeddings a1, embeddings a2, embeddings b1\r\n" + 
