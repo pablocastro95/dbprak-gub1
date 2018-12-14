@@ -184,32 +184,6 @@ public class EmbeddingRepository {
 	}
 
 
-	public QueryResult<String> getAnalogousWord(String a1, String a2, String b1) throws SQLException {
-		String result = null;
-				String sql = "SELECT * FROM getAnalogousWord(?, ?, ?)";
-				PreparedStatement preparedStatement2 = con.prepareStatement(sql);
-				preparedStatement2.setString(1, a1);
-				preparedStatement2.setString(2, a2);
-				preparedStatement2.setString(3, b1);
-				long start = System.currentTimeMillis();
-			try {
-				
-				ResultSet rs = preparedStatement2.executeQuery();
-				if(rs.next()) {
-					result = rs.getString(1);
-				}
-				rs.close();
-			} catch (SQLException e) {
-				throw e;
-			} finally {
-				
-				preparedStatement2.close();
-			}
-			
-			long runtime = System.currentTimeMillis() - start;
-			
-		return new QueryResult<String>(result, runtime);
-	}
 
 	/**
 	 * This method returns the k nearest neighbors of a given word using the cos
@@ -271,4 +245,66 @@ public class EmbeddingRepository {
 			}
 		}
 	}
+	
+	public void indexingWordColumn() {
+		try (Statement statement = con.createStatement()) {
+			statement.execute("DROP INDEX IF EXISTS word_indexing;\r\n"
+					+ "CREATE INDEX word_indexing ON embeddings USING btree(word);");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+}
+	public List<String> getRandomWords() {
+		
+		
+		String query = "SELECT word FROM embeddings WHERE LENGTH != 0 offset floor(random() * (100000- (SELECT count(*) from embeddings where length = 0) - 10 ))::int limit 10;";
+		
+		try (Statement statement = con.createStatement()) {
+			ResultSet resultSet = statement.executeQuery(query);
+			List<String> word = new ArrayList<String>();
+			
+			while (resultSet.next()) {
+				word.add(resultSet.getString(1));
+			}
+			return word;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+		
+		
+	}
+	
+	
+	public QueryResult<String> createMaterializedSimView() {
+		
+		List<String> randomWords = getRandomWords();
+		String sqlArray = "";
+		for (String word: randomWords) {
+			sqlArray += "\""+ word + "\",";
+		}
+		sqlArray = sqlArray.substring(0, sqlArray.length()-1);
+		
+		try (Statement statement = con.createStatement()) {
+			long startTime = System.currentTimeMillis();
+			statement.execute("CREATE MATERIALIZED VIEW sim_table (word_1, word_2, cos_sim) AS\n" + 
+					"					(SELECT e1.word, e2.word , sim(e1,e2)\n" + 
+					"					FROM embeddings e1, embeddings e2 WHERE e1.word = ANY ('{"+sqlArray+"}'::varchar[]) AND\n" + 
+					"					e2.word = ANY ('{"+sqlArray+"}'::varchar[]))");
+			long endTime = System.currentTimeMillis();
+			// get size of view
+						ResultSet resultSet = statement.executeQuery("SELECT pg_size_pretty(pg_table_size(oid))\r\n"
+								+ "FROM   pg_class\r\n" + "WHERE  relname = 'sim_table'");
+						String result = "0";
+						if (resultSet.next()) {
+							result = resultSet.getString(1);
+						}
+			return new QueryResult<String>(result, endTime - startTime);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	
 }

@@ -50,16 +50,19 @@ public class Gruppenuebung2_Gruppe1 {
 						results.add(result);
 					}
 					
-					result = runBenchmark("BENCHMARK 4.2: Analogy (20 mins, 500 tests)", new AnalogyBenchmark(), "src/main/resources/questions-words.txt", repo);
-					if(result != null) {
-						results.add(result);
-					}
 					
 					result = runBenchmark("BENCHMARK 4.3: Contains", new ContainsBenchmark(),  "src/main/resources/vocabs_shuffled.txt", repo);
 					if(result != null) {
 						results.add(result);
 					}
-					
+					repo.indexingWordColumn();
+					result = runBenchmark("BENCHMARK 4.3: Contains with Index", new ContainsBenchmark("ContainsBenchmark with Index"),  "src/main/resources/vocabs_shuffled.txt", repo);
+					if(result != null) {
+						results.add(result);
+					}
+					QueryResult<String> viewResult = repo.createMaterializedSimView();
+					System.out.println("Size of materialized View" + viewResult.getResult());
+					System.out.println("Creation time of materialized View in ms " + viewResult.getRunTime());
 					BenchmarkResultPrinter.printPerformance(results);
 					System.out.println("SUCCESS: You can view the results");
 
@@ -68,7 +71,7 @@ public class Gruppenuebung2_Gruppe1 {
 					System.out.println("An error oucurred reading the data. Place the CSV files in the src/main/resources folder");
 				}
 				
-			} catch (IOException | SQLException e) {
+			} catch (IOException | SQLException e ) {
 				// TODO Auto-generated catch block
 				System.out.println("Error: " + e.getMessage());
 			} finally {
@@ -81,6 +84,8 @@ public class Gruppenuebung2_Gruppe1 {
 		}
 
 	}
+	
+	
 	
 	
 	
