@@ -8,7 +8,6 @@ import java.io.Reader;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 /*** 
  * 
@@ -29,7 +28,7 @@ public class Gruppenuebung2_Gruppe1 {
 			System.out.println("SUCCESS");
 			System.out.println();
 			
-			String srcFile = chooseImportData();
+			String srcFile = "src/main/resources/out-unnormalized.csv";
 			
 			
 			try(Reader in = new BufferedReader(new FileReader(new File(srcFile)));) {
@@ -83,31 +82,7 @@ public class Gruppenuebung2_Gruppe1 {
 
 	}
 	
-	private static String chooseImportData() {
-		System.out.print("Do you want to use normalized dataset? Please type: 'Y' for yes or 'N' for no:\n");
-		Scanner scanner = null;
-		String consoleInput = "";
-		String srcFile;
-		
-		try {
-		    scanner = new Scanner(System.in);
-		    consoleInput = scanner.nextLine();				    
-		    if(!(consoleInput.equals("Y") || consoleInput.equals("N"))) {
-				System.out.print("Invalid input, please restart the program and try again.\n");	
-			    System.exit(0);
-		    }
-		    if(consoleInput.equals("Y")) {
-				srcFile = "src/main/resources/out-normalized.csv";
-			} else {
-				srcFile = "src/main/resources/out-unnormalized.csv";
-			}
-		}
-		finally {
-		    if(scanner!=null)
-		        scanner.close();
-		}
-		return srcFile;
-	}
+	
 	
 	private static BenchmarkResult runBenchmark(String bmName, Benchmark bm, String filePath, EmbeddingRepository repo) {
 		BenchmarkResult result = null;
