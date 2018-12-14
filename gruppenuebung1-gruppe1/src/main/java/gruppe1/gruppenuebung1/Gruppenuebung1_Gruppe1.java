@@ -10,6 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+/*** 
+ * 
+ *
+ * @version v1.0.0
+ *
+ */
+
 
 public class Gruppenuebung1_Gruppe1 {
 
